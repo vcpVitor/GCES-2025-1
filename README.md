@@ -1,93 +1,112 @@
-# vcpVitor-project
+# nextjs-django-boilerplate
 
+A barebones example of a Next.js SPA backed by a Django API.
 
+Includes the following:
 
-## Getting started
+Backend:
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+- Django
+- Django REST Framework
+- JWT Authentication
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+Frontend:
 
-## Add your files
+- Next.js
+- Tailwind
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+## Setting up the backend API
+
+Create and activate a virtualenv:
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/vcpvitor-group/vcpVitor-project.git
-git branch -M main
-git push -uf origin main
+$ python3 -m venv .venv
+$ source .venv/bin/activate
 ```
 
-## Integrate with your tools
+Install Python requirements:
 
-- [ ] [Set up project integrations](https://gitlab.com/vcpvitor-group/vcpVitor-project/-/settings/integrations)
+```
+$ pip install -r requirements/base.txt
+```
 
-## Collaborate with your team
+Configure the Django environment:
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+- Rename the sample environment file to `.env`:
+    ```
+    $ mv .env.sample .env
+    ```
+- Edit the `.env` file and provide a value for `SECRET_KEY`
 
-## Test and Deploy
+Set up the DB (uses sqlite by default):
 
-Use the built-in continuous integration in GitLab.
+```
+$ python manage.py makemigrations api
+$ python manage.py migrate
+```
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+### Running the API locally
 
-***
+```
+$ python manage.py runserver 4001
+```
 
-# Editing this README
+The API is now running at http://localhost:4001
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+## Setting up the frontend UI
 
-## Suggestions for a good README
+In a new shell instance, switch to the `www` folder and install JavaScript dependencies:
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+```
+$ cd www
+$ npm install
+```
 
-## Name
-Choose a self-explaining name for your project.
+### Running the UI locally
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+```
+$ npm run dev
+```
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+The UI is now running. Visit http://localhost:4000 in your browser.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+## Running tests
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+```
+$ python manage.py test
+```
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+## Deployment
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+Below is a quick overview on deploying the app to Heroku and Vercel.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+### Notes on securing cookies
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+This project is configured so that the Next.js app and Django API are deployed separately. Whether they are deployed to different subdomains on the same second level domain (so something like Next.js -> www.example.com, Django -> api.example.com) or completely separate domains will affect how the refresh token cookie settings should be configured. This is because the former configuration results in [requests that are considered same-site](https://security.stackexchange.com/questions/223473/for-samesite-cookie-with-subdomains-what-are-considered-the-same-site) which allows us to set the SameSite attribute in the cookie to Lax. Otherwise, we need to set the SameSite to None.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+### Backend
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+To deploy the backend on Heroku:
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+1. Create a new app on Heroku
+2. Add Heroku Postgres
+3. Connect the app to your github repo
+4. Update the config variables (see below)
+5. On the Deploy tab in Heroku, trigger a deploy manually from Github (or switch on automatic deploys if you want).
 
-## License
-For open source projects, say how it is licensed.
+#### Backend config vars
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+- `SECRET_KEY`: see Django docs
+- `DATABASE_URL`: set automatically when Postgres is added
+- `CORS_ORIGIN_REGEX_WHITELIST`: A comma-separated list of origins ([ref](https://github.com/adamchainz/django-cors-headers#cors_origin_whitelist)). This should include the URL that the Next.js app gets deployed to (see below).
+- `IGNORE_DOT_ENV_FILE=on`
+
+### Frontend
+
+To deploy the frontend on Vercel:
+
+1. Click "Import Project"
+2. Enter the URL of your github repo
+3. Select the `www` subdirectory.
+4. Add the `NEXT_PUBLIC_API_HOST` env var with the value set to the URL the Django API gets deployed to
+5. Complete the build
