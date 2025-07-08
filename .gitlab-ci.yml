@@ -37,6 +37,7 @@ test_api:
   stage: test
   image: python:3.8-slim
   before_script:
+    - apt-get update && apt-get install -y gcc libpq-dev
     - pip install -r requirements/base.txt
     - pip install -r requirements/server.txt
   script:
@@ -47,7 +48,6 @@ test_www:
   image: $CI_REGISTRY_IMAGE/www:latest
   needs: ["build_www"]
   before_script:
-    - cd www
     - npm install
   script:
     - npm test
@@ -65,7 +65,6 @@ lint_www:
   image: $CI_REGISTRY_IMAGE/www:latest
   needs: ["build_www"]
   before_script:
-    - cd www
     - npm install
   script:
     - npm run lint

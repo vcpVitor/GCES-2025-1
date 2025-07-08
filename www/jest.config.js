@@ -4,5 +4,13 @@ module.exports = {
   testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/'],
   moduleNameMapper: {
     '\.(css|less|scss|sass)$_': 'identity-obj-proxy'
-  }
+  },
+  transform: {
+    '^.+\.(ts|tsx)$_': 'ts-jest',
+  },
+  globals: {
+    'ts-jest': {
+      tsconfig: 'tsconfig.json',
+    },
+  },
 };
