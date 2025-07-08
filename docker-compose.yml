@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=nextjs_django_dev
+      - POSTGRES_USER=nextjs_django_dev
+      - POSTGRES_PASSWORD=nextjs_django_dev
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev.api
+    command: python manage.py runserver 0.0.0.0:4001
+    volumes:
+      - .:/app
+    ports:
+      - "4001:4001"
+    env_file:
+      - .env.dev
+    depends_on:
+      - db
+
+  www:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev.www
+    command: npm run dev
+    volumes:
+      - ./www:/app/www
+      - /app/www/node_modules
+      - /app/www/.next
+    ports:
+      - "4000:4000"
+    environment:
+      - NEXT_PUBLIC_API_HOST=http://localhost:4001
+
+volumes:
+  postgres_data:
