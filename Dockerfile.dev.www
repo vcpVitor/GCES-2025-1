@@ -1,0 +1,20 @@
+# Use the Node.js version specified in .nvmrc
+FROM node:10.17.0-slim
+
+# Set work directory
+WORKDIR /app/www
+
+# Copy package.json and package-lock.json
+COPY www/package.json www/package-lock.json /app/www/
+
+# Install dependencies
+RUN npm install
+
+# Copy the rest of the frontend code
+COPY www /app/www
+
+# Expose the port the app runs on
+EXPOSE 4000
+
+# Start the app
+CMD ["npm", "run", "dev"]
