@@ -6,11 +6,6 @@ module.exports = {
     '\.(css|less|scss|sass)$_': 'identity-obj-proxy'
   },
   transform: {
-    '^.+\.(ts|tsx)$_': 'ts-jest',
-  },
-  globals: {
-    'ts-jest': {
-      tsconfig: 'tsconfig.json',
-    },
+    '^.+\.(js|jsx|ts|tsx)$_': 'babel-jest',
   },
 };
