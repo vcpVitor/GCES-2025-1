@@ -38,7 +38,7 @@ test_api:
     DEBUG: 'True'
   script:
     - docker load < api.tar
-    - docker run --env-file .env api:latest python manage.py test
+    - docker run -e SECRET_KEY="$SECRET_KEY" -e DATABASE_URL="$DATABASE_URL" -e DEBUG="$DEBUG" api:latest python manage.py test
   dependencies:
     - build_api
 

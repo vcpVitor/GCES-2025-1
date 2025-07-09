@@ -7,8 +7,11 @@ WORKDIR /app/www
 # Copy package.json and package-lock.json
 COPY www/package.json www/package-lock.json /app/www/
 
-# Install dependencies
+# Install dependencies normais
 RUN npm install --force
+
+# Instala dependências de teste e lint (devDependencies)
+RUN npm install --save-dev jest ts-jest @types/jest @testing-library/react @testing-library/jest-dom identity-obj-proxy
 
 # Copy the rest of the frontend code
 COPY www /app/www
