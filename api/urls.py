@@ -3,19 +3,20 @@ from django.contrib import admin
 from django.urls import include, path
 
 from . import views
-from . import jwt_views
+# from . import jwt_views
+
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView  # ✅ esta linha é essencial
+
 
 admin.autodiscover()
 
 
 urlpatterns = [
     path("me/", views.Profile.as_view(), name="me"),
-    path("token/", jwt_views.Login.as_view(), name="token"),
-    path(
-        "token/refresh/", jwt_views.RefreshToken.as_view(),
-        name="token-refresh"
-    ),
-    path("token/logout/", jwt_views.Logout.as_view(), name="logout"),
+  #  path("token/", jwt_views.Login.as_view(), name="token"),
+    path("token/", TokenObtainPairView.as_view(), name="token"),
+    #path("token/logout/", jwt_views.Logout.as_view(), name="logout"),
+    path("token/refresh/", TokenRefreshView.as_view(), name="token-refresh"),
     path("ping/", views.Ping.as_view(), name="ping"),
     path("admin/", admin.site.urls),
 ]

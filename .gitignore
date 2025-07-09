@@ -1,6 +1,18 @@
 .venv
-.env
 *.db
 
 www/node_modules
 www/.next
+
+# Ambientes virtuais
+venv/
+api/venv/
+
+# Configs locais
+.env*
+*.sqlite3
+
+# Docker
+*.tar
+Dockerfile.prod.*
+docker-compose-prod.yml
