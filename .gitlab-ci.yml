@@ -3,73 +3,70 @@ stages:
   - test
   - lint
 
-variables:
-  # When using dind, it's wise to use the overlayfs driver for
-  # improved performance.
-  DOCKER_DRIVER: overlay2
-  DOCKER_TLS_CERTDIR: "/certs"
-
-# This service is used for building docker images
-services:
-  - docker:dind
-
 build_api:
   stage: build
   image: docker:latest
-  before_script:
-    # Docker login is required to push images to the registry, but it's a good practice
-    # to include it even for building, in case you want to push later.
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  services:
+    - docker:dind
   script:
-    - docker build -t $CI_REGISTRY_IMAGE/api:latest -f Dockerfile.dev.api .
-    - docker push $CI_REGISTRY_IMAGE/api:latest
+    - docker build -t api:latest -f Dockerfile.dev.api .
+    - docker save api:latest > api.tar
+  artifacts:
+    paths:
+      - api.tar
 
 build_www:
   stage: build
   image: docker:latest
-  before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  services:
+    - docker:dind
   script:
-    - docker build -t $CI_REGISTRY_IMAGE/www:latest -f Dockerfile.dev.www .
-    - docker push $CI_REGISTRY_IMAGE/www:latest
+    - docker build -t www:latest -f Dockerfile.dev.www .
+    - docker save www:latest > www.tar
+  artifacts:
+    paths:
+      - www.tar
 
 test_api:
   stage: test
-  image: python:3.8-slim
-  variables:
-    SECRET_KEY: "ci-test-key"
-    IGNORE_DOT_ENV_FILE: "on"
-  before_script:
-    - apt-get update && apt-get install -y gcc libpq-dev
-    - pip install -r requirements/base.txt
-    - pip install -r requirements/server.txt
+  image: docker:latest
+  services:
+    - docker:dind
   script:
-    - python manage.py test
+    - docker load < api.tar
+    - docker run api:latest python manage.py test
+  dependencies:
+    - build_api
 
 test_www:
   stage: test
-  image: $CI_REGISTRY_IMAGE/www:latest
-  needs: ["build_www"]
-  before_script:
-    - cd www
-    - npm install
+  image: docker:latest
+  services:
+    - docker:dind
   script:
-    - npm test
+    - docker load < www.tar
+    - docker run www:latest npm test
+  dependencies:
+    - build_www
 
 lint_api:
   stage: lint
-  image: python:3.8-slim
-  before_script:
-    - pip install ruff
+  image: docker:latest
+  services:
+    - docker:dind
   script:
-    - ruff check .
+    - docker load < api.tar
+    - docker run api:latest flake8
+  dependencies:
+    - build_api
 
 lint_www:
   stage: lint
-  image: $CI_REGISTRY_IMAGE/www:latest
-  needs: ["build_www"]
-  before_script:
-    - cd www
-    - npm install
+  image: docker:latest
+  services:
+    - docker:dind
   script:
-    - npm run lint
+    - docker load < www.tar
+    - docker run www:latest npm run lint
+  dependencies:
+    - build_www
