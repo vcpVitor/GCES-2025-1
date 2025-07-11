@@ -10,8 +10,9 @@ class TestToken(TestCase):
         self.client = APIClient()
 
     def test_token_success(self):
+        url = reverse("token")
         resp = self.client.post(
-            reverse("token"),
+            url,
             {"username": "jeff", "password": "sifjo123909201jdasd"}
         )
         self.assertEqual(resp.status_code, 200)
@@ -19,8 +20,9 @@ class TestToken(TestCase):
         self.assertIn("refresh", resp.data)
 
     def test_token_error(self):
+        url = reverse("token")
         resp = self.client.post(
-            reverse("token"),
+            url,
             {"username": "jeff", "password": "foo"}
         )
         self.assertEqual(resp.status_code, 401)

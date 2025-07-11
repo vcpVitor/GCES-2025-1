@@ -1,6 +1,7 @@
 from datetime import timedelta
 import os
 import environ
+import sys
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -195,3 +196,7 @@ if ON_SERVER:
     SECURE_SSL_REDIRECT = True
 
 APPEND_SLASH = True
+
+if "test" in sys.argv:
+    APPEND_SLASH = False
+    SECURE_SSL_REDIRECT = False
