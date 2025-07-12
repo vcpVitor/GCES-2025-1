@@ -71,6 +71,6 @@ lint_www:
     - docker:dind
   script:
     - docker load < www.tar
-    - docker run --rm -w /app/www www:latest npm run lint -- --dir /app/www
+    - docker run --rm -w /app/www www:latest npm run lint
   dependencies:
     - build_www
