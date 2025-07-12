@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "test": "jest --watchAll=false",
-    "lint": "next lint ."
+    "lint": "eslint . --no-error-on-unmatched-pattern"
   },
   "author": "",
   "license": "ISC",
@@ -31,6 +31,8 @@
     "jest-environment-jsdom": "^27.5.1",
     "tailwindcss": "^1.6.2",
     "ts-jest": "^27.1.5",
-    "typescript": "^3.9.7"
+    "typescript": "^3.9.7",
+    "eslint": "^8.56.0",
+    "eslint-plugin-react": "^7.34.1"
   }
 }

@@ -1,23 +1,15 @@
-# Use the Node.js version specified in .nvmrc
 FROM node:18-slim
 
-# Set work directory
 WORKDIR /app/www
 
-# Copy package.json and package-lock.json
-COPY www/package.json www/package-lock.json /app/www/
+# Copia todo o frontend ANTES das instalações
+COPY www/ /app/www/
 
-# Install dependencies normais
+# Instala dependências
 RUN npm install --force
 
-# Instala dependências de teste e lint (devDependencies)
+# Instala devDependencies extras
 RUN npm install --save-dev jest ts-jest @types/jest @testing-library/react @testing-library/jest-dom identity-obj-proxy
 
-# Copy the rest of the frontend code
-COPY www /app/www
-
-# Expose the port the app runs on
 EXPOSE 4000
-
-# Start the app
 CMD ["npm", "run", "dev"]
