@@ -14,5 +14,14 @@ api/venv/
 
 # Docker
 *.tar
-Dockerfile.prod.*
+#Dockerfile.prod.*
 docker-compose-prod.yml
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.log
+www/out/
+.env*
