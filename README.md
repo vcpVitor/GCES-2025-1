@@ -1,112 +1,153 @@
-# nextjs-django-boilerplate
 
-A barebones example of a Next.js SPA backed by a Django API.
+# Projeto GCES 2025-1 – Aplicação Django + Next.js com CI/CD
 
-Includes the following:
+Este projeto é parte do trabalho individual da disciplina **Gerência de Configuração de Software (GCES)**. A aplicação é composta por:
 
-Backend:
+- **Backend**: Django + Django REST Framework + JWT Authentication
+- **Frontend**: Next.js + TailwindCSS
+- **Banco de Dados**: PostgreSQL
 
-- Django
-- Django REST Framework
-- JWT Authentication
+Todo o ambiente é containerizado com **Docker** e orquestrado com **Docker Compose**, para desenvolvimento e produção. Também conta com **pipeline de CI/CD automatizado via GitLab CI**, com etapas de build, teste, lint e deploy contínuo para o Container Registry.
 
-Frontend:
+---
 
-- Next.js
-- Tailwind
-
-## Setting up the backend API
-
-Create and activate a virtualenv:
+## 📦 Estrutura do Projeto
 
 ```
-$ python3 -m venv .venv
-$ source .venv/bin/activate
+.
+├── api/               # Backend Django
+├── www/               # Frontend Next.js
+├── docker-compose.yml             # Ambiente de desenvolvimento
+├── docker-compose.prod.yml        # Ambiente de produção
+├── Dockerfile.dev.api             # Docker dev - backend
+├── Dockerfile.dev.www            # Docker dev - frontend
+├── Dockerfile.prod.api           # Docker prod - backend
+├── Dockerfile.prod.www          # Docker prod - frontend
+├── nginx/                        # Configuração para Nginx (produção)
+├── .gitlab-ci.yml               # Pipeline de CI/CD
 ```
 
-Install Python requirements:
+---
 
-```
-$ pip install -r requirements/base.txt
-```
+## 🚀 Desenvolvimento Local (modo DEV)
 
-Configure the Django environment:
+### Pré-requisitos
 
-- Rename the sample environment file to `.env`:
-    ```
-    $ mv .env.sample .env
-    ```
-- Edit the `.env` file and provide a value for `SECRET_KEY`
+- Docker
+- Docker Compose
 
-Set up the DB (uses sqlite by default):
+### Rodando o ambiente completo
 
-```
-$ python manage.py makemigrations api
-$ python manage.py migrate
+```bash
+docker compose up --build
 ```
 
-### Running the API locally
+- Frontend: http://localhost:4000
+- Backend (API): http://localhost:4001
 
-```
-$ python manage.py runserver 4001
-```
+As alterações no código são refletidas automaticamente (hot reload).
 
-The API is now running at http://localhost:4001
+---
 
-## Setting up the frontend UI
+## 🧪 Testes e Lint
 
-In a new shell instance, switch to the `www` folder and install JavaScript dependencies:
+### Testes Backend
 
-```
-$ cd www
-$ npm install
+```bash
+docker compose exec api python manage.py test
 ```
 
-### Running the UI locally
+### Testes Frontend
 
-```
-$ npm run dev
-```
-
-The UI is now running. Visit http://localhost:4000 in your browser.
-
-## Running tests
-
-```
-$ python manage.py test
+```bash
+docker compose exec www npm run test
 ```
 
-## Deployment
+### Lint Backend
 
-Below is a quick overview on deploying the app to Heroku and Vercel.
+```bash
+docker compose exec api flake8
+```
 
-### Notes on securing cookies
+### Lint Frontend
 
-This project is configured so that the Next.js app and Django API are deployed separately. Whether they are deployed to different subdomains on the same second level domain (so something like Next.js -> www.example.com, Django -> api.example.com) or completely separate domains will affect how the refresh token cookie settings should be configured. This is because the former configuration results in [requests that are considered same-site](https://security.stackexchange.com/questions/223473/for-samesite-cookie-with-subdomains-what-are-considered-the-same-site) which allows us to set the SameSite attribute in the cookie to Lax. Otherwise, we need to set the SameSite to None.
+```bash
+docker compose exec www npm run lint
+```
 
-### Backend
+---
 
-To deploy the backend on Heroku:
+## 📦 Produção (modo PROD)
 
-1. Create a new app on Heroku
-2. Add Heroku Postgres
-3. Connect the app to your github repo
-4. Update the config variables (see below)
-5. On the Deploy tab in Heroku, trigger a deploy manually from Github (or switch on automatic deploys if you want).
+A produção roda com:
 
-#### Backend config vars
+- **Nginx** servindo o frontend exportado (`next export`)
+- **Django** com configurações de `DEBUG=False` e banco PostgreSQL
+- **Sem exposição de portas exceto 80 e 443**
 
-- `SECRET_KEY`: see Django docs
-- `DATABASE_URL`: set automatically when Postgres is added
-- `CORS_ORIGIN_REGEX_WHITELIST`: A comma-separated list of origins ([ref](https://github.com/adamchainz/django-cors-headers#cors_origin_whitelist)). This should include the URL that the Next.js app gets deployed to (see below).
-- `IGNORE_DOT_ENV_FILE=on`
+### Rodando localmente (prod)
 
-### Frontend
+```bash
+docker compose -f docker-compose.prod.yml up --build
+```
 
-To deploy the frontend on Vercel:
+---
 
-1. Click "Import Project"
-2. Enter the URL of your github repo
-3. Select the `www` subdirectory.
-4. Add the `NEXT_PUBLIC_API_HOST` env var with the value set to the URL the Django API gets deployed to
-5. Complete the build
+## 🔄 CI/CD com GitLab
+
+O pipeline de CI está definido em `.gitlab-ci.yml` e realiza:
+
+- **Build** dos serviços
+- **Testes automatizados**
+- **Análise de estilo (lint)**
+- **Deploy contínuo** com envio das imagens para o GitLab Container Registry
+
+---
+
+## 📌 Variáveis de Ambiente
+
+Crie um `.env` na raiz ou configure via GitLab CI:
+
+**Backend (.env):**
+```
+SECRET_KEY=...
+DEBUG=True
+ALLOWED_HOSTS=*
+DATABASE_URL=postgres://user:password@db:5432/dbname
+```
+
+**Frontend (www/.env.local):**
+```
+NEXT_PUBLIC_API_HOST=http://localhost:4001
+```
+
+---
+
+## 🐳 Publicação das Imagens
+
+O deploy contínuo envia as imagens para o GitLab Container Registry:
+
+- `registry.gitlab.com/<user>/<repo>/api`
+- `registry.gitlab.com/<user>/<repo>/www`
+
+---
+
+## ✅ Etapas Entregues (Trabalho GCES)
+
+| Etapa | Descrição | Entregue |
+|-------|-----------|----------|
+| 1     | Containerização DEV (Dockerfiles) | ✅ |
+| 2     | Docker Compose (DEV) | ✅ |
+| 3.1   | CI - Build | ✅ |
+| 3.2   | CI - Testes | ✅ |
+| 3.3   | CI - Lint | ✅ |
+| 4     | Dockerfiles PROD | ✅ |
+| 5     | Compose PROD com Nginx + SSL | ✅ |
+| 6     | Deploy Contínuo no GitLab Registry | ✅ |
+
+---
+
+## 👨‍💻 Autor
+
+Vitor Carvalho Pereira  
+GitLab: [`vcpVitor`](https://gitlab.com/vcpVitor)
