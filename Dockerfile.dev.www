@@ -11,5 +11,9 @@ RUN npm install --force
 # Instala devDependencies extras
 RUN npm install --save-dev jest ts-jest @types/jest @testing-library/react @testing-library/jest-dom identity-obj-proxy
 
+# ⚠️ Adiciona variável de ambiente para evitar erro do OpenSSL
+ENV NODE_OPTIONS=--openssl-legacy-provider
+
 EXPOSE 4000
+
 CMD ["npm", "run", "dev"]
