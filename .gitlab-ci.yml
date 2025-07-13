@@ -2,6 +2,7 @@ stages:
   - build
   - test
   - lint
+  - deploy
 
 build_api:
   stage: build
@@ -74,3 +75,32 @@ lint_www:
     - docker run --rm -w /app/www www:latest npm run lint
   dependencies:
     - build_www
+
+variables:
+  IMAGE_BACKEND: registry.gitlab.com/vcpvitor-group/vcpVitor-project/backend
+  IMAGE_FRONTEND: registry.gitlab.com/vcpvitor-group/vcpVitor-project/frontend
+  DOCKER_DRIVER: overlay2
+
+.deploy_template: &deploy_template
+  stage: deploy
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - echo "$CI_JOB_TOKEN" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+
+deploy_backend:
+  <<: *deploy_template
+  script:
+    - docker build -t $IMAGE_BACKEND -f Dockerfile.prod.api .
+    - docker push $IMAGE_BACKEND
+  only:
+    - main
+
+deploy_frontend:
+  <<: *deploy_template
+  script:
+    - docker build -t $IMAGE_FRONTEND -f Dockerfile.prod.www .
+    - docker push $IMAGE_FRONTEND
+  only:
+    - main
